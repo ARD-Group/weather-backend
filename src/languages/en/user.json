@@ -1,0 +1,22 @@
+{
+    "list": "Users list retrieved successfully.",
+    "get": "User details fetched successfully.",
+    "create": "New user created successfully.",
+    "updateStatus": "User status updated to {status}.",
+    "profile": "User profile retrieved successfully.",
+    "updateProfile": "User profile updated successfully.",
+    "uploadPhotoProfile": "Profile photo upload request successful.",
+    "updatePhotoProfile": "Profile picture uploaded successfully.",
+    "deleteSelf": "User deleted successfully.",
+    "updateClaimUsername": "Username claimed successfully.",
+    "error": {
+        "emailExist": "This email already exists.",
+        "blocked": "This user is blocked.",
+        "deleted": "This user has been deleted.",
+        "inactive": "This user is inactive.",
+        "blockedInvalid": "Invalid blocked status.",
+        "notFound": "Sorry, we couldn't find the user you requested.",
+        "statusInvalid": "Invalid user status.",
+        "usernameExist": "This username has already been taken."
+    }
+}

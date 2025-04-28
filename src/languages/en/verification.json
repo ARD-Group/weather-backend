@@ -1,0 +1,10 @@
+{
+    "getEmail": "Please check your email for the verification code.",
+    "resendEmail": "Verification code has been resent to your email.",
+    "verifyEmail": "Email has been successfully verified.",
+    "error": {
+        "notFound": "Verification not found.",
+        "otpNotMatch": "Verification code does not match.",
+        "userEmailVerified": "This email has already been verified."
+    }
+}
