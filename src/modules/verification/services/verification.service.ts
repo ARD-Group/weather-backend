@@ -91,6 +91,28 @@ export class VerificationService implements IVerificationService {
         return this.verificationRepository.getTotal(find, options);
     }
 
+    async createEmailByEmail(
+        email: string,
+        options?: IDatabaseCreateOptions
+    ): Promise<VerificationDoc> {
+        const otp = this.createOtp();
+        const expiredDate = this.createExpiredDate();
+        const reference = this.createReference();
+
+        const create: VerificationEntity = new VerificationEntity();
+        create.to = email;
+        create.type = ENUM_VERIFICATION_TYPE.EMAIL;
+        create.otp = otp;
+        create.expiredDate = expiredDate;
+        create.isActive = true;
+        create.reference = reference;
+
+        return this.verificationRepository.create<VerificationEntity>(
+            create,
+            options
+        );
+    }
+
     async createEmailByUser(
         user: UserDoc,
         options?: IDatabaseCreateOptions
@@ -115,18 +137,18 @@ export class VerificationService implements IVerificationService {
     }
 
     async findOneLatestEmailByUser(
-        user: string,
+        email: string,
         options?: IDatabaseFindOneOptions
     ): Promise<VerificationDoc> {
         return this.verificationRepository.findOne<VerificationDoc>(
             {
-                user,
+                to: email,
                 isActive: true,
                 isVerify: false,
                 type: ENUM_VERIFICATION_TYPE.EMAIL,
-                expired: {
-                    $gte: this.helperDateService.create(),
-                },
+                // expired: {
+                //     $gte: this.helperDateService.create(),
+                // },
             },
             {
                 ...options,
@@ -134,8 +156,6 @@ export class VerificationService implements IVerificationService {
             }
         );
     }
-
-
 
     validateOtp(verification: VerificationDoc, otp: string): boolean {
         return verification.otp === otp;
@@ -150,6 +170,17 @@ export class VerificationService implements IVerificationService {
         repository.verifyDate = this.helperDateService.create();
 
         return this.verificationRepository.save(repository, options);
+    }
+
+    async inactiveEmailManyByEmail(
+        email: string,
+        options?: IDatabaseUpdateManyOptions
+    ): Promise<UpdateResult> {
+        return this.verificationRepository.updateMany(
+            { to: email, type: ENUM_VERIFICATION_TYPE.EMAIL },
+            { isActive: false },
+            options
+        );
     }
 
     async inactiveEmailManyByUser(

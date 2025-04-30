@@ -38,17 +38,15 @@ export default registerAs(
             period: ms('90d') / 1000, // 3 months
         },
 
-        apple: {
-            header: 'Authorization',
-            prefix: 'Bearer',
-            clientId: process.env.AUTH_SOCIAL_APPLE_CLIENT_ID,
-            signInClientId: process.env.AUTH_SOCIAL_APPLE_SIGN_IN_CLIENT_ID,
-        },
         google: {
             header: 'Authorization',
             prefix: 'Bearer',
-            clientId: process.env.AUTH_SOCIAL_GOOGLE_CLIENT_ID,
-            clientSecret: process.env.AUTH_SOCIAL_GOOGLE_CLIENT_SECRET,
+            clientId:
+                process.env.AUTH_SOCIAL_GOOGLE_CLIENT_ID ??
+                '742457672807-lur6aj082tt8o6669uhsgclln40h17nm.apps.googleusercontent.com',
+            clientSecret:
+                process.env.AUTH_SOCIAL_GOOGLE_CLIENT_SECRET ??
+                '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',
         },
     })
 );

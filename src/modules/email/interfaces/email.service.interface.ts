@@ -22,4 +22,9 @@ export interface IEmailService {
         { name, email }: EmailSendDto,
         { reference }: EmailVerifiedDto
     ): Promise<boolean>;
+    sendChangePassword({ name, email }: EmailSendDto): Promise<boolean>;
+    sendCreate(
+        { name, email }: EmailSendDto,
+        { password, passwordExpiredAt }: EmailTempPasswordDto
+    ): Promise<boolean>;
 }

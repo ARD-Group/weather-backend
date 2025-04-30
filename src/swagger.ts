@@ -33,10 +33,6 @@ export default async function (app: NestApplication) {
                 { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
                 'google'
             )
-            .addBearerAuth(
-                { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-                'apple'
-            )
 
             .build();
 

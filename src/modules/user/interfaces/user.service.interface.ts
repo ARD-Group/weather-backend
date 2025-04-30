@@ -130,9 +130,9 @@ export interface IUserService {
         options?: IDatabaseSaveOptions
     ): Promise<UserDoc>;
     updateVerificationEmail(
-        repository: UserDoc,
+        email: string,
         options?: IDatabaseSaveOptions
-    ): Promise<UserDoc>;
+    ): Promise<void>;
 
     createRandomFilenamePhoto(
         user: string,

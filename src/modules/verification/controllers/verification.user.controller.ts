@@ -22,11 +22,10 @@ import {
     AuthJwtPayload,
 } from 'src/modules/auth/decorators/auth.jwt.decorator';
 import { AuthJwtAccessPayloadDto } from 'src/modules/auth/dtos/jwt/auth.jwt.access-payload.dto';
-import {
-    ENUM_SEND_EMAIL_PROCESS,
-} from 'src/modules/email/enums/email.enum';
+import { ENUM_SEND_EMAIL_PROCESS } from 'src/modules/email/enums/email.enum';
 import { PolicyRoleProtected } from 'src/modules/policy/decorators/policy.decorator';
 import { ENUM_POLICY_ROLE_TYPE } from 'src/modules/policy/enums/policy.enum';
+import { ResetPasswordVerifyRequestDto } from 'src/modules/reset-password/dtos/request/reset-password.verify.request.dto';
 import { UserProtected } from 'src/modules/user/decorators/user.decorator';
 import { UserParsePipe } from 'src/modules/user/pipes/user.parse.pipe';
 import { UserDoc } from 'src/modules/user/repository/entities/user.entity';
@@ -36,6 +35,7 @@ import {
     VerificationUserResendEmailDoc,
     VerificationUserVerifyEmailDoc,
 } from 'src/modules/verification/docs/verification.user.doc';
+import { VerificationResendEmailRequestDto } from 'src/modules/verification/dtos/request/verification.resend.request.dto';
 import { VerificationVerifyRequestDto } from 'src/modules/verification/dtos/request/verification.verify.request.dto';
 import { VerificationResponse } from 'src/modules/verification/dtos/response/verification.response';
 import { ENUM_VERIFICATION_STATUS_CODE_ERROR } from 'src/modules/verification/enums/verification.status-code.constant';
@@ -88,16 +88,13 @@ export class VerificationUserController {
 
     @VerificationUserResendEmailDoc()
     @Response('verification.resendEmail')
-    @PolicyRoleProtected(ENUM_POLICY_ROLE_TYPE.USER)
-    @UserProtected()
-    @AuthJwtAccessProtected()
     @Post('/resend/email')
     async resendEmail(
-        @AuthJwtPayload<AuthJwtAccessPayloadDto>('user', UserParsePipe)
-        user: UserDoc
+        @Body() { email }: VerificationResendEmailRequestDto
     ): Promise<IResponse<VerificationResponse>> {
         const latestVerification: VerificationDoc =
-            await this.verificationService.findOneLatestEmailByUser(user._id);
+            await this.verificationService.findOneLatestEmailByUser(email);
+        console.log('latestVerification', latestVerification);
         if (latestVerification) {
             const mapped: VerificationResponse =
                 this.verificationService.map(latestVerification);
@@ -112,12 +109,12 @@ export class VerificationUserController {
         session.startTransaction();
 
         try {
-            await this.verificationService.inactiveEmailManyByUser(user._id, {
+            await this.verificationService.inactiveEmailManyByEmail(email, {
                 session,
             });
 
             const verification: VerificationDoc =
-                await this.verificationService.createEmailByUser(user, {
+                await this.verificationService.createEmailByEmail(email, {
                     session,
                 });
 
@@ -127,7 +124,7 @@ export class VerificationUserController {
             await this.emailQueue.add(
                 ENUM_SEND_EMAIL_PROCESS.VERIFICATION,
                 {
-                    send: { email: user.email, name: user.name },
+                    send: { email: email },
                     data: {
                         otp: verification.otp,
                         expiredAt: verification.expiredDate,
@@ -136,7 +133,7 @@ export class VerificationUserController {
                 },
                 {
                     debounce: {
-                        id: `${ENUM_SEND_EMAIL_PROCESS.VERIFICATION}-${user._id}`,
+                        id: `${ENUM_SEND_EMAIL_PROCESS.VERIFICATION}-${email}`,
                         ttl: 1000,
                     },
                 }
@@ -162,22 +159,17 @@ export class VerificationUserController {
 
     @VerificationUserVerifyEmailDoc()
     @Response('verification.verifyEmail')
-    @PolicyRoleProtected(ENUM_POLICY_ROLE_TYPE.USER)
-    @UserProtected()
-    @AuthJwtAccessProtected()
     @HttpCode(HttpStatus.OK)
     @Post('/verify/email')
     async verifyEmail(
-        @AuthJwtPayload<AuthJwtAccessPayloadDto>(
-            'user',
-            UserParsePipe,
-            VerificationUserEmailNotVerifiedYetPipe
-        )
-        user: UserDoc,
-        @Body() { otp }: VerificationVerifyRequestDto
+        @Body() { otp, email }: VerificationVerifyRequestDto
     ): Promise<void> {
+        console.log('email===', email);
+
         const verification: VerificationDoc =
-            await this.verificationService.findOneLatestEmailByUser(user._id);
+            await this.verificationService.findOneLatestEmailByUser(email);
+        console.log('verification', verification);
+
         if (!verification) {
             throw new NotFoundException({
                 statusCode: ENUM_VERIFICATION_STATUS_CODE_ERROR.NOT_FOUND,
@@ -205,7 +197,7 @@ export class VerificationUserController {
                 this.verificationService.verify(verification, {
                     session,
                 }),
-                this.userService.updateVerificationEmail(user, {
+                this.userService.updateVerificationEmail(email, {
                     session,
                 }),
             ]);
@@ -216,14 +208,14 @@ export class VerificationUserController {
             await this.emailQueue.add(
                 ENUM_SEND_EMAIL_PROCESS.EMAIL_VERIFIED,
                 {
-                    send: { email: user.email, name: user.name },
+                    send: { email: email },
                     data: {
                         reference: verification.reference,
                     },
                 },
                 {
                     debounce: {
-                        id: `${ENUM_SEND_EMAIL_PROCESS.EMAIL_VERIFIED}-${user._id}`,
+                        id: `${ENUM_SEND_EMAIL_PROCESS.EMAIL_VERIFIED}-${email}`,
                         ttl: 1000,
                     },
                 }

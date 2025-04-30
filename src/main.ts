@@ -19,7 +19,11 @@ async function bootstrap() {
         abortOnError: true,
         bufferLogs: false,
     });
-
+    app.enableCors({
+        origin: '*', // Your React app's URL (adjust as needed)
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        credentials: true,
+    });
     const configService = app.get(ConfigService);
     const databaseUri: string = configService.get<string>('database.url');
     const env: string = configService.get<string>('app.env');

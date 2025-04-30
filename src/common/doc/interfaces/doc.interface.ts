@@ -25,7 +25,6 @@ export interface IDocAuthOptions {
     jwtAccessToken?: boolean;
     jwtRefreshToken?: boolean;
     google?: boolean;
-    apple?: boolean;
 }
 
 export interface IDocRequestOptions<T = any> {

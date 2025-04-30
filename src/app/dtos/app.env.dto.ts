@@ -201,14 +201,6 @@ export class AppEnvDto {
     @IsString()
     AUTH_SOCIAL_GOOGLE_CLIENT_SECRET?: string;
 
-    @IsOptional()
-    @IsString()
-    AUTH_SOCIAL_APPLE_CLIENT_ID?: string;
-
-    @IsOptional()
-    @IsString()
-    AUTH_SOCIAL_APPLE_SIGN_IN_CLIENT_ID?: string;
-
     @IsNotEmpty()
     @IsString()
     REDIS_HOST: string;
