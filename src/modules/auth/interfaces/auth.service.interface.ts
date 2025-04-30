@@ -1,7 +1,6 @@
 import { ENUM_AUTH_LOGIN_FROM } from 'src/modules/auth/enums/auth.enum';
 import { AuthJwtAccessPayloadDto } from 'src/modules/auth/dtos/jwt/auth.jwt.access-payload.dto';
 import { AuthJwtRefreshPayloadDto } from 'src/modules/auth/dtos/jwt/auth.jwt.refresh-payload.dto';
-import { AuthSocialApplePayloadDto } from 'src/modules/auth/dtos/social/auth.social.apple-payload.dto';
 import { AuthSocialGooglePayloadDto } from 'src/modules/auth/dtos/social/auth.social.google-payload.dto';
 import {
     IAuthPassword,
@@ -47,7 +46,6 @@ export interface IAuthService {
     createToken(user: IUserDoc, session: string): Promise<AuthLoginResponseDto>;
     getPasswordAttempt(): Promise<boolean>;
     getPasswordMaxAttempt(): Promise<number>;
-    appleGetTokenInfo(code: string): Promise<AuthSocialApplePayloadDto>;
     googleGetTokenInfo(
         accessToken: string
     ): Promise<AuthSocialGooglePayloadDto>;

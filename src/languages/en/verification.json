@@ -5,6 +5,7 @@
     "error": {
         "notFound": "Verification not found.",
         "otpNotMatch": "Verification code does not match.",
-        "userEmailVerified": "This email has already been verified."
+        "userEmailVerified": "This email has already been verified.",
+        "userEmailNotVerified": "This email has not been verified."
     }
 }

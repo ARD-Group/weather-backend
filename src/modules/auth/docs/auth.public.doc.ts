@@ -37,18 +37,6 @@ export function AuthPublicLoginSocialGoogleDoc(): MethodDecorator {
     );
 }
 
-export function AuthPublicLoginSocialAppleDoc(): MethodDecorator {
-    return applyDecorators(
-        Doc({
-            summary: 'Login with social apple',
-        }),
-        DocAuth({ apple: true }),
-        DocResponse<AuthLoginResponseDto>('auth.loginWithSocialApple', {
-            dto: AuthLoginResponseDto,
-        })
-    );
-}
-
 export function AuthPublicSignUpDoc(): MethodDecorator {
     return applyDecorators(
         Doc({

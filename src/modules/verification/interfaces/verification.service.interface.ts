@@ -32,6 +32,10 @@ export interface IVerificationService {
         user: UserDoc,
         options?: IDatabaseCreateOptions
     ): Promise<VerificationDoc>;
+    createEmailByEmail(
+        email: string,
+        options?: IDatabaseCreateOptions
+    ): Promise<VerificationDoc>;
 
     findOneLatestEmailByUser(
         user: string,

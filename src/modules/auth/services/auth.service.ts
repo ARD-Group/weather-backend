@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import verifyAppleToken from 'verify-apple-id-token';
 import { LoginTicket, OAuth2Client, TokenPayload } from 'google-auth-library';
 import { HelperDateService } from 'src/common/helper/services/helper.date.service';
 import { HelperEncryptionService } from 'src/common/helper/services/helper.encryption.service';
@@ -13,7 +12,6 @@ import {
     IAuthPassword,
     IAuthPasswordOptions,
 } from 'src/modules/auth/interfaces/auth.interface';
-import { AuthSocialApplePayloadDto } from 'src/modules/auth/dtos/social/auth.social.apple-payload.dto';
 import { AuthSocialGooglePayloadDto } from 'src/modules/auth/dtos/social/auth.social.google-payload.dto';
 import { ENUM_AUTH_LOGIN_FROM } from 'src/modules/auth/enums/auth.enum';
 import { plainToInstance } from 'class-transformer';
@@ -41,10 +39,6 @@ export class AuthService implements IAuthService {
 
     private readonly passwordAttempt: boolean;
     private readonly passwordMaxAttempt: number;
-
-    // apple
-    private readonly appleClientId: string;
-    private readonly appleSignInClientId: string;
 
     // google
     private readonly googleClient: OAuth2Client;
@@ -93,16 +87,13 @@ export class AuthService implements IAuthService {
             'auth.password.maxAttempt'
         );
 
-        // apple
-        this.appleClientId = this.configService.get<string>(
-            'auth.apple.clientId'
-        );
-        this.appleSignInClientId = this.configService.get<string>(
-            'auth.apple.signInClientId'
-        );
-
         // google
         this.googleClient = new OAuth2Client(
+            this.configService.get<string>('auth.google.clientId'),
+            this.configService.get<string>('auth.google.clientSecret')
+        );
+        console.log(
+            '000000',
             this.configService.get<string>('auth.google.clientId'),
             this.configService.get<string>('auth.google.clientSecret')
         );
@@ -258,9 +249,7 @@ export class AuthService implements IAuthService {
         return today > passwordExpiredConvert;
     }
 
-    async createToken(
-        user: IUserDoc
-    ): Promise<AuthLoginResponseDto> {
+    async createToken(user: IUserDoc): Promise<AuthLoginResponseDto> {
         const loginDate = this.helperDateService.create();
         const roleType = user.role.type;
 
@@ -327,17 +316,6 @@ export class AuthService implements IAuthService {
 
     async getPasswordMaxAttempt(): Promise<number> {
         return this.passwordMaxAttempt;
-    }
-
-    async appleGetTokenInfo(
-        idToken: string
-    ): Promise<AuthSocialApplePayloadDto> {
-        const payload = await verifyAppleToken({
-            idToken,
-            clientId: [this.appleClientId, this.appleSignInClientId],
-        });
-
-        return { email: payload.email, emailVerified: payload.email_verified };
     }
 
     async googleGetTokenInfo(

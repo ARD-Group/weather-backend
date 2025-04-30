@@ -434,14 +434,15 @@ export class UserService implements IUserService {
     }
 
     async updateVerificationEmail(
-        repository: UserDoc,
+        email: string,
         options?: IDatabaseSaveOptions
-    ): Promise<UserDoc> {
+    ): Promise<void> {
+        const repository = await this.findOneByEmail(email);
         repository.verification.email = true;
         repository.verification.emailVerifiedDate =
             this.helperDateService.create();
 
-        return this.userRepository.save(repository, options);
+        await this.userRepository.save(repository, options);
     }
 
     async join(repository: UserDoc): Promise<IUserDoc> {

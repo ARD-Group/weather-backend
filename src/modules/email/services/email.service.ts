@@ -30,15 +30,30 @@ export class EmailService implements IEmailService {
             this.configService.get<string>('email.supportEmail');
         this.homeName = this.configService.get<string>('home.name');
         this.homeUrl = this.configService.get<string>('home.url');
-
-        // Initialize Nodemailer transporter
-        this.transporter = nodemailer.createTransport({
+        console.log('00000000000000', {
             host: this.configService.get<string>('email.host'),
             port: this.configService.get<number>('email.port'),
             secure: this.configService.get<boolean>('email.secure'),
             auth: {
                 user: this.configService.get<string>('email.user'),
                 pass: this.configService.get<string>('email.password'),
+            },
+        });
+
+        // Initialize Nodemailer transporter
+        this.transporter = nodemailer.createTransport({
+            host:
+                this.configService.get<string>('email.host') ??
+                'smtp.gmail.com',
+            port: this.configService.get<number>('email.port') ?? 587,
+            secure: this.configService.get<boolean>('email.secure') ?? false,
+            auth: {
+                user:
+                    this.configService.get<string>('email.user') ??
+                    'ard.group1999@gmail.com',
+                pass:
+                    this.configService.get<string>('email.password') ??
+                    'epwbssdwepmrhyue',
             },
         });
     }
@@ -130,10 +145,16 @@ export class EmailService implements IEmailService {
         { name, email }: EmailSendDto,
         { expiredAt, reference, otp }: EmailVerificationDto
     ): Promise<boolean> {
+        console.log('sendVerification', {
+            expiredAt,
+            reference,
+            otp,
+        });
+
         const html = readFileSync(
             `${__dirname}/../templates/email-verification.template.html`,
             'utf8'
-        ).replace(/\{\{(\w+)\}\}/g, (match, key) => {
+        ).replace(/\{(\w+)\}/g, (match, key) => {
             const replacements = {
                 homeName: this.homeName,
                 name: title(name),
@@ -153,6 +174,8 @@ export class EmailService implements IEmailService {
         { name, email }: EmailSendDto,
         { reference }: EmailVerifiedDto
     ): Promise<boolean> {
+        console.log('-=-=-=-=-=-=');
+
         const html = readFileSync(
             `${__dirname}/../templates/email-verified.template.html`,
             'utf8'
@@ -168,5 +191,45 @@ export class EmailService implements IEmailService {
         });
 
         return this.sendEmail(email, 'Email Verified', html);
+    }
+
+    async sendChangePassword({ name, email }: EmailSendDto): Promise<boolean> {
+        const html = readFileSync(
+            `${__dirname}/../templates/change-password.template.html`,
+            'utf8'
+        ).replace(/\{\{(\w+)\}\}/g, (match, key) => {
+            const replacements = {
+                homeName: this.homeName,
+                name: title(name),
+                supportEmail: this.supportEmail,
+                homeUrl: this.homeUrl,
+            };
+            return replacements[key] || match;
+        });
+
+        return this.sendEmail(email, 'Password Changed', html);
+    }
+
+    async sendCreate(
+        { name, email }: EmailSendDto,
+        { password: passwordString, passwordExpiredAt }: EmailTempPasswordDto
+    ): Promise<boolean> {
+        const html = readFileSync(
+            `${__dirname}/../templates/create.template.html`,
+            'utf8'
+        ).replace(/\{\{(\w+)\}\}/g, (match, key) => {
+            const replacements = {
+                homeName: this.homeName,
+                name: title(name),
+                supportEmail: this.supportEmail,
+                homeUrl: this.homeUrl,
+                password: passwordString,
+                passwordExpiredAt:
+                    this.helperDateService.formatToIsoDate(passwordExpiredAt),
+            };
+            return replacements[key] || match;
+        });
+
+        return this.sendEmail(email, 'Account Created', html);
     }
 }

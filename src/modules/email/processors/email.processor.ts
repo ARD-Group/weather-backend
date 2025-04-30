@@ -14,8 +14,7 @@ import { EmailService } from 'src/modules/email/services/email.service';
 import { ENUM_WORKER_QUEUES } from 'src/worker/enums/worker.enum';
 
 @Processor(ENUM_WORKER_QUEUES.EMAIL_QUEUE)
-// export class EmailProcessor extends WorkerHost implements IEmailProcessor {
-export class EmailProcessor {
+export class EmailProcessor extends WorkerHost implements IEmailProcessor {
     private readonly debug: boolean;
     private readonly logger = new Logger(EmailProcessor.name);
 
@@ -23,111 +22,111 @@ export class EmailProcessor {
         private readonly emailService: EmailService,
         private readonly configService: ConfigService
     ) {
-        // super();
+        super();
 
         this.debug = this.configService.get<boolean>('debug.enable');
     }
 
-    // async process(job: Job<EmailWorkerDto, any, string>): Promise<void> {
-    //     try {
-    //         const jobName = job.name;
-    //         switch (jobName) {
-    //             case ENUM_SEND_EMAIL_PROCESS.TEMPORARY_PASSWORD:
-    //                 await this.processTempPassword(
-    //                     job.data.send,
-    //                     job.data.data as EmailTempPasswordDto
-    //                 );
+    async process(job: Job<EmailWorkerDto, any, string>): Promise<void> {
+        try {
+            const jobName = job.name;
+            switch (jobName) {
+                case ENUM_SEND_EMAIL_PROCESS.TEMPORARY_PASSWORD:
+                    await this.processTempPassword(
+                        job.data.send,
+                        job.data.data as EmailTempPasswordDto
+                    );
 
-    //                 break;
-    //             case ENUM_SEND_EMAIL_PROCESS.CHANGE_PASSWORD:
-    //                 await this.processChangePassword(job.data.send);
+                    break;
+                case ENUM_SEND_EMAIL_PROCESS.CHANGE_PASSWORD:
+                    await this.processChangePassword(job.data.send);
 
-    //                 break;
-    //             case ENUM_SEND_EMAIL_PROCESS.WELCOME:
-    //                 await this.processWelcome(job.data.send);
+                    break;
+                case ENUM_SEND_EMAIL_PROCESS.WELCOME:
+                    await this.processWelcome(job.data.send);
 
-    //                 break;
-    //             case ENUM_SEND_EMAIL_PROCESS.CREATE:
-    //                 await this.processCreate(
-    //                     job.data.send,
-    //                     job.data.data as EmailTempPasswordDto
-    //                 );
+                    break;
+                case ENUM_SEND_EMAIL_PROCESS.CREATE:
+                    await this.processCreate(
+                        job.data.send,
+                        job.data.data as EmailTempPasswordDto
+                    );
 
-    //                 break;
-    //             case ENUM_SEND_EMAIL_PROCESS.RESET_PASSWORD:
-    //                 await this.processResetPassword(
-    //                     job.data.send,
-    //                     job.data.data as EmailResetPasswordDto
-    //                 );
+                    break;
+                case ENUM_SEND_EMAIL_PROCESS.RESET_PASSWORD:
+                    await this.processResetPassword(
+                        job.data.send,
+                        job.data.data as EmailResetPasswordDto
+                    );
 
-    //                 break;
-    //             case ENUM_SEND_EMAIL_PROCESS.VERIFICATION:
-    //                 await this.processVerification(
-    //                     job.data.send,
-    //                     job.data.data as EmailVerificationDto
-    //                 );
+                    break;
+                case ENUM_SEND_EMAIL_PROCESS.VERIFICATION:
+                    await this.processVerification(
+                        job.data.send,
+                        job.data.data as EmailVerificationDto
+                    );
 
-    //                 break;
-    //             case ENUM_SEND_EMAIL_PROCESS.EMAIL_VERIFIED:
-    //                 await this.processEmailVerified(
-    //                     job.data.send,
-    //                     job.data.data as EmailVerifiedDto
-    //                 );
+                    break;
+                case ENUM_SEND_EMAIL_PROCESS.EMAIL_VERIFIED:
+                    await this.processEmailVerified(
+                        job.data.send,
+                        job.data.data as EmailVerifiedDto
+                    );
 
-    //                 break;
+                    break;
 
-    //             default:
-    //                 break;
-    //         }
-    //     } catch (error: any) {
-    //         if (this.debug) {
-    //             this.logger.error(error);
-    //         }
-    //     }
+                default:
+                    break;
+            }
+        } catch (error: any) {
+            if (this.debug) {
+                this.logger.error(error);
+            }
+        }
 
-    //     return;
-    // }
+        return;
+    }
 
-    // async processWelcome(data: EmailSendDto): Promise<boolean> {
-    //     return this.emailService.sendWelcome(data);
-    // }
+    async processWelcome(data: EmailSendDto): Promise<boolean> {
+        return this.emailService.sendWelcome(data);
+    }
 
-    // async processChangePassword(data: EmailSendDto): Promise<boolean> {
-    //     return this.emailService.sendChangePassword(data);
-    // }
+    async processChangePassword(data: EmailSendDto): Promise<boolean> {
+        return this.emailService.sendChangePassword(data);
+    }
 
-    // async processTempPassword(
-    //     data: EmailSendDto,
-    //     tempPassword: EmailTempPasswordDto
-    // ): Promise<boolean> {
-    //     return this.emailService.sendTempPassword(data, tempPassword);
-    // }
+    async processTempPassword(
+        data: EmailSendDto,
+        tempPassword: EmailTempPasswordDto
+    ): Promise<boolean> {
+        return this.emailService.sendTempPassword(data, tempPassword);
+    }
 
-    // async processCreate(
-    //     data: EmailSendDto,
-    //     tempPassword: EmailTempPasswordDto
-    // ): Promise<boolean> {
-    //     return this.emailService.sendCreate(data, tempPassword);
-    // }
+    async processCreate(
+        data: EmailSendDto,
+        tempPassword: EmailTempPasswordDto
+    ): Promise<boolean> {
+        return this.emailService.sendCreate(data, tempPassword);
+    }
 
-    // async processResetPassword(
-    //     data: EmailSendDto,
-    //     resetPassword: EmailResetPasswordDto
-    // ): Promise<boolean> {
-    //     return this.emailService.sendResetPassword(data, resetPassword);
-    // }
+    async processResetPassword(
+        data: EmailSendDto,
+        resetPassword: EmailResetPasswordDto
+    ): Promise<boolean> {
+        return this.emailService.sendResetPassword(data, resetPassword);
+    }
 
-    // async processVerification(
-    //     data: EmailSendDto,
-    //     resetPassword: EmailVerificationDto
-    // ): Promise<boolean> {
-    //     return this.emailService.sendVerification(data, resetPassword);
-    // }
+    async processVerification(
+        data: EmailSendDto,
+        resetPassword: EmailVerificationDto
+    ): Promise<boolean> {
+        return this.emailService.sendVerification(data, resetPassword);
+    }
 
-    // async processEmailVerified(
-    //     data: EmailSendDto,
-    //     resetPassword: EmailVerifiedDto
-    // ): Promise<boolean> {
-    //     return this.emailService.sendEmailVerified(data, resetPassword);
-    // }
+    async processEmailVerified(
+        data: EmailSendDto,
+        resetPassword: EmailVerifiedDto
+    ): Promise<boolean> {
+        return this.emailService.sendEmailVerified(data, resetPassword);
+    }
 }

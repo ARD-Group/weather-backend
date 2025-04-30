@@ -14,4 +14,12 @@ export class ResetPasswordVerifyRequestDto {
     @MaxLength(6)
     @MinLength(6)
     otp: string;
+
+    @ApiProperty({
+        required: true,
+        example: faker.internet.email(),
+    })
+    @IsString()
+    @IsNotEmpty()
+    email: string;
 }
