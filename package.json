@@ -80,7 +80,10 @@
         "rotating-file-stream": "^3.2.6",
         "rxjs": "^7.8.2",
         "xlsx": "^0.18.5",
-        "yargs": "^17.7.2"
+        "yargs": "^17.7.2",
+        "@nestjs-modules/ioredis": "^1.0.1",
+        "ioredis": "^5.3.2",
+        "axios": "^1.6.2"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.8.0",
