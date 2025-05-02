@@ -92,11 +92,6 @@ export class AuthService implements IAuthService {
             this.configService.get<string>('auth.google.clientId'),
             this.configService.get<string>('auth.google.clientSecret')
         );
-        console.log(
-            '000000',
-            this.configService.get<string>('auth.google.clientId'),
-            this.configService.get<string>('auth.google.clientSecret')
-        );
     }
 
     async createAccessToken(

@@ -30,15 +30,6 @@ export class EmailService implements IEmailService {
             this.configService.get<string>('email.supportEmail');
         this.homeName = this.configService.get<string>('home.name');
         this.homeUrl = this.configService.get<string>('home.url');
-        console.log('00000000000000', {
-            host: this.configService.get<string>('email.host'),
-            port: this.configService.get<number>('email.port'),
-            secure: this.configService.get<boolean>('email.secure'),
-            auth: {
-                user: this.configService.get<string>('email.user'),
-                pass: this.configService.get<string>('email.password'),
-            },
-        });
 
         // Initialize Nodemailer transporter
         this.transporter = nodemailer.createTransport({
@@ -145,12 +136,6 @@ export class EmailService implements IEmailService {
         { name, email }: EmailSendDto,
         { expiredAt, reference, otp }: EmailVerificationDto
     ): Promise<boolean> {
-        console.log('sendVerification', {
-            expiredAt,
-            reference,
-            otp,
-        });
-
         const html = readFileSync(
             `${__dirname}/../templates/email-verification.template.html`,
             'utf8'
@@ -174,8 +159,6 @@ export class EmailService implements IEmailService {
         { name, email }: EmailSendDto,
         { reference }: EmailVerifiedDto
     ): Promise<boolean> {
-        console.log('-=-=-=-=-=-=');
-
         const html = readFileSync(
             `${__dirname}/../templates/email-verified.template.html`,
             'utf8'

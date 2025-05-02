@@ -3,15 +3,22 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { ForecastResponse } from 'src/modules/weather/interfaces/forecast.interface';
 import { SearchResult } from 'src/modules/weather/interfaces/search.interface';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject } from '@nestjs/common';
+import { ForecastResponseDto } from 'src/modules/weather/dtos/response/forecast.response.dto';
+
 @Injectable()
 export class WeatherService {
     private apiKey: string;
-    private baseUrl: string = 'https://api.weatherapi.com/v1';
+    private baseUrl: string;
 
-    constructor(private configService: ConfigService) {
-        this.apiKey =
-            this.configService.get<string>('WEATHER_API_KEY') ??
-            '0c10d0ad4eb349819de171251253004';
+    constructor(
+        private configService: ConfigService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
+    ) {
+        this.apiKey = this.configService.get<string>('WEATHER_API_KEY');
+        this.baseUrl = this.configService.get<string>('WEATHER_API_URL');
         if (!this.apiKey) {
             console.error(
                 'WEATHER_API_KEY is not defined in environment variables'
@@ -20,6 +27,15 @@ export class WeatherService {
     }
 
     async getForecast(locationName: string, days: number = 5) {
+        const cacheKey = `forecast:${locationName}:${days}`;
+
+        // Try to get from cache first
+        const cachedForecast =
+            await this.cacheManager.get<ForecastResponseDto>(cacheKey);
+        if (cachedForecast) {
+            return cachedForecast;
+        }
+
         try {
             const response = await axios.get<ForecastResponse>(
                 `${this.baseUrl}/forecast.json`,
@@ -59,7 +75,7 @@ export class WeatherService {
                     })),
             }));
 
-            return {
+            const result = {
                 location: {
                     name: location.name,
                     country: location.country,
@@ -80,9 +96,13 @@ export class WeatherService {
                         sunset: astronomy.sunset,
                     },
                 },
-
                 daily_forecast: dailyForecast,
             };
+
+            // Cache the result for 1 minute
+            await this.cacheManager.set(cacheKey, result, 60 * 1000);
+
+            return result;
         } catch (error) {
             if (error.response) {
                 throw new HttpException(
@@ -99,6 +119,15 @@ export class WeatherService {
     }
 
     async searchLocations(query: string): Promise<SearchResult[]> {
+        const cacheKey = `search:${query}`;
+
+        // Try to get from cache first
+        const cachedResults =
+            await this.cacheManager.get<SearchResult[]>(cacheKey);
+        if (cachedResults) {
+            return cachedResults;
+        }
+
         try {
             const response = await axios.get<SearchResult[]>(
                 `${this.baseUrl}/search.json`,
@@ -110,7 +139,12 @@ export class WeatherService {
                 }
             );
 
-            return response.data;
+            const results = response.data;
+
+            // Cache the results for 1 hour
+            await this.cacheManager.set(cacheKey, results, 60 * 60 * 1000);
+
+            return results;
         } catch (error) {
             if (error.response) {
                 throw new HttpException(

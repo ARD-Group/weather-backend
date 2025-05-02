@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 
 export const ForecastDocParamsId = [
     {
-        name: 'city',
+        name: 'location',
         allowEmptyValue: false,
         required: true,
         type: 'string',
