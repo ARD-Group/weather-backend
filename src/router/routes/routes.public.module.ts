@@ -11,10 +11,7 @@ import { VerificationModule } from 'src/modules/verification/verification.module
 import { ENUM_WORKER_QUEUES } from 'src/worker/enums/worker.enum';
 
 @Module({
-    controllers: [
-        AuthPublicController,
-        ResetPasswordPublicController,
-    ],
+    controllers: [AuthPublicController, ResetPasswordPublicController],
     providers: [],
     exports: [],
     imports: [

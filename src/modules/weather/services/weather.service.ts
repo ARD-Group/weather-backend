@@ -1,150 +1,162 @@
-// import { Injectable, Logger } from '@nestjs/common';
-// import { ConfigService } from '@nestjs/config';
-// import { InjectRedis } from '@nestjs-modules/ioredis';
-// import Redis from 'ioredis';
-// import axios from 'axios';
-// import {
-//     WeatherResponseDto,
-//     ForecastResponseDto,
-//     LocationDto,
-// } from '../dtos/weather.dto';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
+import { ForecastResponse } from 'src/modules/weather/interfaces/forecast.interface';
+import { SearchResult } from 'src/modules/weather/interfaces/search.interface';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject } from '@nestjs/common';
+import { ForecastResponseDto } from 'src/modules/weather/dtos/response/forecast.response.dto';
 
-// @Injectable()
-// export class WeatherService {
-//     private readonly logger = new Logger(WeatherService.name);
-//     private readonly apiKey: string;
-//     private readonly baseUrl = 'http://api.weatherapi.com/v1';
-//     private readonly cacheTTL = 1800; // 30 minutes
+@Injectable()
+export class WeatherService {
+    private apiKey: string;
+    private baseUrl: string;
 
-//     constructor(
-//         private readonly configService: ConfigService,
-//         @InjectRedis() private readonly redis: Redis
-//     ) {
-//         this.apiKey =
-//             this.configService.get<string>('WEATHER_API_KEY') ??
-//             '0c10d0ad4eb349819de171251253004';
-//     }
+    constructor(
+        private configService: ConfigService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
+    ) {
+        this.apiKey = this.configService.get<string>('WEATHER_API_KEY');
+        this.baseUrl = this.configService.get<string>('WEATHER_API_URL');
+        if (!this.apiKey) {
+            console.error(
+                'WEATHER_API_KEY is not defined in environment variables'
+            );
+        }
+    }
 
-//     private getCacheKey(type: string, location: string): string {
-//         return `weather:${type}:${location.toLowerCase()}`;
-//     }
+    async getForecast(locationName: string, days: number = 5) {
+        const cacheKey = `forecast:${locationName}:${days}`;
 
-//     async getCurrentWeather(location: string): Promise<WeatherResponseDto> {
-//         const cacheKey = this.getCacheKey('current', location);
-//         const cachedData = await this.redis.get(cacheKey);
+        // Try to get from cache first
+        const cachedForecast =
+            await this.cacheManager.get<ForecastResponseDto>(cacheKey);
+        if (cachedForecast) {
+            return cachedForecast;
+        }
 
-//         if (cachedData) {
-//             return JSON.parse(cachedData);
-//         }
+        try {
+            const response = await axios.get<ForecastResponse>(
+                `${this.baseUrl}/forecast.json`,
+                {
+                    params: {
+                        key: this.apiKey,
+                        q: locationName,
+                        days: days,
+                        aqi: 'no',
+                        alerts: 'no',
+                    },
+                }
+            );
 
-//         try {
-//             const response = await axios.get(`${this.baseUrl}/current.json`, {
-//                 params: {
-//                     key: this.apiKey,
-//                     q: location,
-//                     aqi: 'no',
-//                 },
-//             });
+            const { location, current, forecast } = response.data;
 
-//             const { location: loc, current } = response.data;
-//             const weatherData: WeatherResponseDto = {
-//                 location: loc.name,
-//                 temperature: current.temp_c,
-//                 feelsLike: current.feelslike_c,
-//                 condition: current.condition.text,
-//                 humidity: current.humidity,
-//                 windSpeed: current.wind_kph,
-//                 pressure: current.pressure_mb,
-//                 uv: current.uv,
-//                 sunrise: loc.localtime.split(' ')[1],
-//                 sunset: loc.localtime.split(' ')[1], // Note: WeatherAPI free tier doesn't provide sunrise/sunset
-//             };
+            // Extract sunrise and sunset times from the first day
+            const astronomy = forecast.forecastday[0].astro;
 
-//             await this.redis.setex(
-//                 cacheKey,
-//                 this.cacheTTL,
-//                 JSON.stringify(weatherData)
-//             );
-//             return weatherData;
-//         } catch (error) {
-//             this.logger.error(
-//                 `Error fetching current weather for ${location}:`,
-//                 error
-//             );
-//             throw error;
-//         }
-//     }
+            // Format daily forecast
+            const dailyForecast = forecast.forecastday.map(day => ({
+                date: day.date,
+                max_temp_c: day.day.maxtemp_c,
+                min_temp_c: day.day.mintemp_c,
+                avg_temp_c: day.day.avgtemp_c,
+                condition: day.day.condition.text,
+                icon: day.day.condition.icon,
+                hourly_forecast: day.hour
+                    .filter((_hour, index) => index % 3 === 0) // Get every 3 hours
+                    .map(hour => ({
+                        time: hour.time_epoch,
+                        temp_c: hour.temp_c,
+                        condition: hour.condition.text,
+                        wind_kph: hour.wind_kph,
+                        icon: hour.condition.icon,
+                        wind_dir: hour.wind_dir,
+                    })),
+            }));
 
-//     async getForecast(location: string): Promise<ForecastResponseDto> {
-//         const cacheKey = this.getCacheKey('forecast', location);
-//         const cachedData = await this.redis.get(cacheKey);
+            const result = {
+                location: {
+                    name: location.name,
+                    country: location.country,
+                    localtime: location.localtime_epoch,
+                    tz: location.tz_id,
+                },
+                current: {
+                    temp_c: current.temp_c,
+                    feels_like_c: current.feelslike_c,
+                    condition: current.condition.text,
+                    humidity: current.humidity,
+                    wind_kph: current.wind_kph,
+                    pressure_mb: current.pressure_mb,
+                    uv: current.uv,
+                    icon: current.condition.icon,
+                    astronomy: {
+                        sunrise: astronomy.sunrise,
+                        sunset: astronomy.sunset,
+                    },
+                },
+                daily_forecast: dailyForecast,
+            };
 
-//         if (cachedData) {
-//             return JSON.parse(cachedData);
-//         }
+            // Cache the result for 1 minute
+            await this.cacheManager.set(cacheKey, result, 60 * 1000);
 
-//         try {
-//             const response = await axios.get(`${this.baseUrl}/forecast.json`, {
-//                 params: {
-//                     key: this.apiKey,
-//                     q: location,
-//                     days: 5,
-//                     aqi: 'no',
-//                 },
-//             });
+            return result;
+        } catch (error) {
+            if (error.response) {
+                throw new HttpException(
+                    error.response.data.error.message ||
+                        'Error fetching forecast data',
+                    error.response.status || HttpStatus.BAD_REQUEST
+                );
+            }
+            throw new HttpException(
+                'Failed to fetch forecast data',
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 
-//             const { forecast } = response.data;
-//             const forecastData: ForecastResponseDto = {
-//                 daily: forecast.forecastday.map(day => ({
-//                     date: day.date,
-//                     temperature: day.day.avgtemp_c,
-//                     condition: day.day.condition.text,
-//                 })),
-//                 hourly: forecast.forecastday[0].hour.map(hour => ({
-//                     time: hour.time.split(' ')[1],
-//                     temperature: hour.temp_c,
-//                     condition: hour.condition.text,
-//                     windSpeed: hour.wind_kph,
-//                 })),
-//             };
+    async searchLocations(query: string): Promise<SearchResult[]> {
+        const cacheKey = `search:${query}`;
 
-//             await this.redis.setex(
-//                 cacheKey,
-//                 this.cacheTTL,
-//                 JSON.stringify(forecastData)
-//             );
-//             return forecastData;
-//         } catch (error) {
-//             this.logger.error(
-//                 `Error fetching forecast for ${location}:`,
-//                 error
-//             );
-//             throw error;
-//         }
-//     }
+        // Try to get from cache first
+        const cachedResults =
+            await this.cacheManager.get<SearchResult[]>(cacheKey);
+        if (cachedResults) {
+            return cachedResults;
+        }
 
-//     // Optional: Methods for managing favorite locations
-//     private readonly locationsCacheKey = 'weather:locations';
+        try {
+            const response = await axios.get<SearchResult[]>(
+                `${this.baseUrl}/search.json`,
+                {
+                    params: {
+                        key: this.apiKey,
+                        q: query,
+                    },
+                }
+            );
 
-//     async saveLocation(location: LocationDto): Promise<LocationDto> {
-//         const locations = await this.getLocations();
-//         locations.push(location);
-//         await this.redis.set(this.locationsCacheKey, JSON.stringify(locations));
-//         return location;
-//     }
+            const results = response.data;
 
-//     async getLocations(): Promise<LocationDto[]> {
-//         const locations = await this.redis.get(this.locationsCacheKey);
-//         return locations ? JSON.parse(locations) : [];
-//     }
+            // Cache the results for 1 hour
+            await this.cacheManager.set(cacheKey, results, 60 * 60 * 1000);
 
-//     async deleteLocation(id: string): Promise<boolean> {
-//         const locations = await this.getLocations();
-//         const filteredLocations = locations.filter(loc => loc.id !== id);
-//         await this.redis.set(
-//             this.locationsCacheKey,
-//             JSON.stringify(filteredLocations)
-//         );
-//         return true;
-//     }
-// }
+            return results;
+        } catch (error) {
+            if (error.response) {
+                throw new HttpException(
+                    error.response.data.error.message ||
+                        'Error searching locations',
+                    error.response.status || HttpStatus.BAD_REQUEST
+                );
+            }
+            throw new HttpException(
+                'Failed to search locations',
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+}

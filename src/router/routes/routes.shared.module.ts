@@ -8,10 +8,7 @@ import { UserModule } from 'src/modules/user/user.module';
 import { ENUM_WORKER_QUEUES } from 'src/worker/enums/worker.enum';
 
 @Module({
-    controllers: [
-        UserSharedController,
-        AuthSharedController,
-    ],
+    controllers: [UserSharedController, AuthSharedController],
     providers: [],
     exports: [],
     imports: [
