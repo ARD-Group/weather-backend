@@ -18,7 +18,6 @@ export class UserShortResponseDto extends OmitType(UserListResponseDto, [
     @Exclude()
     status: ENUM_USER_STATUS;
 
-
     @ApiHideProperty()
     @Exclude()
     createdAt: Date;

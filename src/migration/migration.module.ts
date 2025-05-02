@@ -18,11 +18,7 @@ import { UserModule } from 'src/modules/user/user.module';
         RoleModule,
         UserModule,
     ],
-    providers: [
-        MigrationUserSeed,
-        MigrationRoleSeed,
-        MigrationTemplateSeed,
-    ],
+    providers: [MigrationUserSeed, MigrationRoleSeed, MigrationTemplateSeed],
     exports: [],
 })
 export class MigrationModule {}

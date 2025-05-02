@@ -1,49 +1,48 @@
-// import {
-//     Controller,
-//     Get,
-//     Post,
-//     Delete,
-//     Query,
-//     Body,
-//     Param,
-// } from '@nestjs/common';
-// import { WeatherService } from '../services/weather.service';
-// import {
-//     WeatherResponseDto,
-//     ForecastResponseDto,
-//     LocationDto,
-// } from '../dtos/weather.dto';
+import { Controller, Get, Query, Param } from '@nestjs/common';
+import { WeatherService } from '../services/weather.service';
+import { ForecastRequestDto } from 'src/modules/weather/dtos/request/forecast.request.dto';
+import { SearchRequestDto } from 'src/modules/weather/dtos/request/search.request.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { ForecastDoc } from 'src/modules/weather/docs/forecast.doc';
+import { SearchDoc } from 'src/modules/weather/docs/search.doc';
+import { Response } from 'src/common/response/decorators/response.decorator';
+import { IResponse } from 'src/common/response/interfaces/response.interface';
+import { ForecastResponseDto } from 'src/modules/weather/dtos/response/forecast.response.dto';
+import { SearchResponseDto } from 'src/modules/weather/dtos/response/search.response.dto';
+import { LocationRequestDto } from 'src/modules/weather/dtos/request/location.request.dto';
+@ApiTags('modules.weather')
+@Controller({
+    version: '1',
+    path: '/weather',
+})
+export class WeatherController {
+    constructor(private readonly weatherService: WeatherService) {}
 
-// @Controller('weather')
-// export class WeatherController {
-//     constructor(private readonly weatherService: WeatherService) {}
+    @ForecastDoc()
+    @Response('weather.forecast')
+    @Get('forecast/:location')
+    async getForecast(
+        @Param() params: LocationRequestDto,
+        @Query() query: ForecastRequestDto
+    ): Promise<IResponse<ForecastResponseDto>> {
+        const forecast = await this.weatherService.getForecast(
+            params.location,
+            query.days || 5
+        );
+        return {
+            data: forecast,
+        };
+    }
 
-//     @Get()
-//     async getCurrentWeather(
-//         @Query('location') location: string
-//     ): Promise<WeatherResponseDto> {
-//         return this.weatherService.getCurrentWeather(location);
-//     }
-
-//     @Get('forecast')
-//     async getForecast(
-//         @Query('location') location: string
-//     ): Promise<ForecastResponseDto> {
-//         return this.weatherService.getForecast(location);
-//     }
-
-//     @Get('locations')
-//     async getLocations(): Promise<LocationDto[]> {
-//         return this.weatherService.getLocations();
-//     }
-
-//     @Post('locations')
-//     async saveLocation(@Body() location: LocationDto): Promise<LocationDto> {
-//         return this.weatherService.saveLocation(location);
-//     }
-
-//     @Delete('locations/:id')
-//     async deleteLocation(@Param('id') id: string): Promise<boolean> {
-//         return this.weatherService.deleteLocation(id);
-//     }
-// }
+    @SearchDoc()
+    @Response('weather.search')
+    @Get('search')
+    async searchLocations(
+        @Query() query: SearchRequestDto
+    ): Promise<IResponse<SearchResponseDto[]>> {
+        const search = await this.weatherService.searchLocations(query.q);
+        return {
+            data: search,
+        };
+    }
+}
