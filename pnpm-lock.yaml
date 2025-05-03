@@ -14,9 +14,6 @@ dependencies:
     '@keyv/redis':
         specifier: ^4.3.2
         version: 4.3.4(keyv@5.3.3)
-    '@nestjs-modules/ioredis':
-        specifier: ^1.0.1
-        version: 1.2.4(@nestjs/axios@4.0.0)(@nestjs/common@11.1.0)(@nestjs/core@11.1.0)(@nestjs/mongoose@11.0.3)(ioredis@5.6.1)(mongoose@8.14.0)(reflect-metadata@0.2.2)(rxjs@7.8.2)
     '@nestjs/axios':
         specifier: ^4.0.0
         version: 4.0.0(@nestjs/common@11.1.0)(axios@1.9.0)(rxjs@7.8.2)
@@ -66,7 +63,7 @@ dependencies:
         specifier: ^6.4.17
         version: 6.4.17
     axios:
-        specifier: ^1.6.2
+        specifier: ^1.8.4
         version: 1.9.0
     bad-words:
         specifier: ^4.0.0
@@ -2789,39 +2786,6 @@ packages:
         dev: true
         optional: true
 
-    /@nestjs-modules/ioredis@1.2.4(@nestjs/axios@4.0.0)(@nestjs/common@11.1.0)(@nestjs/core@11.1.0)(@nestjs/mongoose@11.0.3)(ioredis@5.6.1)(mongoose@8.14.0)(reflect-metadata@0.2.2)(rxjs@7.8.2):
-        resolution:
-            {
-                integrity: sha512-E7rG6Pkzd+V4lV/eY9GY9Jjt4RXYT3Jii5kpoXtEf7cgGfvY9hLpLgIGvItFPhFoUStWk3TunDWv9V0R0iuZmw==,
-            }
-        peerDependencies:
-            '@nestjs/common': '>=6.7.0'
-            '@nestjs/core': '>=6.7.0'
-            ioredis: '>=5.0.0'
-        dependencies:
-            '@nestjs/common': 11.1.0(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-            '@nestjs/core': 11.1.0(@nestjs/common@11.1.0)(@nestjs/platform-express@11.1.0)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-            ioredis: 5.6.1
-        optionalDependencies:
-            '@nestjs/terminus': 10.2.0(@nestjs/axios@4.0.0)(@nestjs/common@11.1.0)(@nestjs/core@11.1.0)(@nestjs/mongoose@11.0.3)(mongoose@8.14.0)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-        transitivePeerDependencies:
-            - '@grpc/grpc-js'
-            - '@grpc/proto-loader'
-            - '@mikro-orm/core'
-            - '@mikro-orm/nestjs'
-            - '@nestjs/axios'
-            - '@nestjs/microservices'
-            - '@nestjs/mongoose'
-            - '@nestjs/sequelize'
-            - '@nestjs/typeorm'
-            - '@prisma/client'
-            - mongoose
-            - reflect-metadata
-            - rxjs
-            - sequelize
-            - typeorm
-        dev: false
-
     /@nestjs/axios@4.0.0(@nestjs/common@11.1.0)(axios@1.9.0)(rxjs@7.8.2):
         resolution:
             {
@@ -3142,70 +3106,6 @@ packages:
             reflect-metadata: 0.2.2
             swagger-ui-dist: 5.21.0
         dev: false
-
-    /@nestjs/terminus@10.2.0(@nestjs/axios@4.0.0)(@nestjs/common@11.1.0)(@nestjs/core@11.1.0)(@nestjs/mongoose@11.0.3)(mongoose@8.14.0)(reflect-metadata@0.2.2)(rxjs@7.8.2):
-        resolution:
-            {
-                integrity: sha512-zPs98xvJ4ogEimRQOz8eU90mb7z+W/kd/mL4peOgrJ/VqER+ibN2Cboj65uJZW3XuNhpOqaeYOJte86InJd44A==,
-            }
-        requiresBuild: true
-        peerDependencies:
-            '@grpc/grpc-js': '*'
-            '@grpc/proto-loader': '*'
-            '@mikro-orm/core': '*'
-            '@mikro-orm/nestjs': '*'
-            '@nestjs/axios': ^1.0.0 || ^2.0.0 || ^3.0.0
-            '@nestjs/common': ^9.0.0 || ^10.0.0
-            '@nestjs/core': ^9.0.0 || ^10.0.0
-            '@nestjs/microservices': ^9.0.0 || ^10.0.0
-            '@nestjs/mongoose': ^9.0.0 || ^10.0.0
-            '@nestjs/sequelize': ^9.0.0 || ^10.0.0
-            '@nestjs/typeorm': ^9.0.0 || ^10.0.0
-            '@prisma/client': '*'
-            mongoose: '*'
-            reflect-metadata: 0.1.x
-            rxjs: 7.x
-            sequelize: '*'
-            typeorm: '*'
-        peerDependenciesMeta:
-            '@grpc/grpc-js':
-                optional: true
-            '@grpc/proto-loader':
-                optional: true
-            '@mikro-orm/core':
-                optional: true
-            '@mikro-orm/nestjs':
-                optional: true
-            '@nestjs/axios':
-                optional: true
-            '@nestjs/microservices':
-                optional: true
-            '@nestjs/mongoose':
-                optional: true
-            '@nestjs/sequelize':
-                optional: true
-            '@nestjs/typeorm':
-                optional: true
-            '@prisma/client':
-                optional: true
-            mongoose:
-                optional: true
-            sequelize:
-                optional: true
-            typeorm:
-                optional: true
-        dependencies:
-            '@nestjs/axios': 4.0.0(@nestjs/common@11.1.0)(axios@1.9.0)(rxjs@7.8.2)
-            '@nestjs/common': 11.1.0(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-            '@nestjs/core': 11.1.0(@nestjs/common@11.1.0)(@nestjs/platform-express@11.1.0)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-            '@nestjs/mongoose': 11.0.3(@nestjs/common@11.1.0)(@nestjs/core@11.1.0)(mongoose@8.14.0)(rxjs@7.8.2)
-            boxen: 5.1.2
-            check-disk-space: 3.4.0
-            mongoose: 8.14.0
-            reflect-metadata: 0.2.2
-            rxjs: 7.8.2
-        dev: false
-        optional: true
 
     /@nestjs/terminus@11.0.0(@nestjs/axios@4.0.0)(@nestjs/common@11.1.0)(@nestjs/core@11.1.0)(@nestjs/mongoose@11.0.3)(mongoose@8.14.0)(reflect-metadata@0.2.2)(rxjs@7.8.2):
         resolution:
