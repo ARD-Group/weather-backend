@@ -41,12 +41,8 @@ export default registerAs(
         google: {
             header: 'Authorization',
             prefix: 'Bearer',
-            clientId:
-                process.env.AUTH_SOCIAL_GOOGLE_CLIENT_ID ??
-                '742457672807-lur6aj082tt8o6669uhsgclln40h17nm.apps.googleusercontent.com',
-            clientSecret:
-                process.env.AUTH_SOCIAL_GOOGLE_CLIENT_SECRET ??
-                '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',
+            clientId: process.env.AUTH_SOCIAL_GOOGLE_CLIENT_ID,
+            clientSecret: process.env.AUTH_SOCIAL_GOOGLE_CLIENT_SECRET,
         },
     })
 );

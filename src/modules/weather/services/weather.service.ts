@@ -72,6 +72,7 @@ export class WeatherService {
                         wind_kph: hour.wind_kph,
                         icon: hour.condition.icon,
                         wind_dir: hour.wind_dir,
+                        is_day: hour.is_day,
                     })),
             }));
 

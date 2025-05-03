@@ -10,6 +10,8 @@ import { IResponse } from 'src/common/response/interfaces/response.interface';
 import { ForecastResponseDto } from 'src/modules/weather/dtos/response/forecast.response.dto';
 import { SearchResponseDto } from 'src/modules/weather/dtos/response/search.response.dto';
 import { LocationRequestDto } from 'src/modules/weather/dtos/request/location.request.dto';
+import { AuthJwtAccessProtected } from 'src/modules/auth/decorators/auth.jwt.decorator';
+
 @ApiTags('modules.weather')
 @Controller({
     version: '1',
@@ -19,6 +21,7 @@ export class WeatherController {
     constructor(private readonly weatherService: WeatherService) {}
 
     @ForecastDoc()
+    @AuthJwtAccessProtected()
     @Response('weather.forecast')
     @Get('forecast/:location')
     async getForecast(
@@ -35,6 +38,7 @@ export class WeatherController {
     }
 
     @SearchDoc()
+    @AuthJwtAccessProtected()
     @Response('weather.search')
     @Get('search')
     async searchLocations(

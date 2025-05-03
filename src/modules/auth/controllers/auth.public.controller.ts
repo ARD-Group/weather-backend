@@ -274,18 +274,6 @@ export class AuthPublicController {
 
             await Promise.all([
                 this.emailQueue.add(
-                    ENUM_SEND_EMAIL_PROCESS.WELCOME,
-                    {
-                        send: { email, name },
-                    },
-                    {
-                        debounce: {
-                            id: `${ENUM_SEND_EMAIL_PROCESS.WELCOME}-${user._id}`,
-                            ttl: 1000,
-                        },
-                    }
-                ),
-                this.emailQueue.add(
                     ENUM_SEND_EMAIL_PROCESS.VERIFICATION,
                     {
                         send: { email, name },
